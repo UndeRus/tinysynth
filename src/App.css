@@ -56,3 +56,68 @@
 .material-icons.disabled-icon {
   color: lightgrey;
 }
+
+.sequenceTrack {
+  height: 2em;
+  width: 20em;
+  background-color: #41046F;
+  text-align: center;
+  vertical-align: baseline;
+}
+
+.sequenceItemCurrent {
+  height: 1em;
+  width: 1em;
+  background-color: #FF9000;
+  display: inline-block;
+}
+
+.sequenceItem {
+  height: 1em;
+  width: 1em;
+  background-color: #007B25;
+  display: inline-block;
+}
+
+.button {
+  height: 60px;
+  width: 60px;
+  border: 1px solid gray;
+  display: inline-block;
+  text-align: center;
+  color: white;
+
+
+
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+   -khtml-user-select: none; /* Konqueror HTML */
+     -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* Internet Explorer/Edge */
+          user-select: none; /* Non-prefixed version, currently
+                                supported by Chrome and Opera */
+}
+
+.num {
+  background-color: #660BAB;
+}
+
+.num-selected {
+  border: 1px solid pink;
+}
+
+.func {
+  background-color: #00BD39;
+}
+
+.func-active {
+  border: 1px solid red;
+}
+
+.knob {
+  background-color: #FF9000;
+}
+
+body {
+  background-color: black;
+}

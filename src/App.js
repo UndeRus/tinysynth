@@ -25,6 +25,248 @@ import * as sequencer from "./sequencer";
 import * as model from "./model";
 import samples from "./samples.json";
 
+class SequenceItem extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <span className={this.props.selected ? "sequenceItemCurrent" : "sequenceItem"} />
+    )
+  }
+}
+
+
+class SequenceLine extends Component {
+  state: {
+    current: number,
+    length: number,
+  };
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      current: 0
+    }
+
+
+    /*
+    var that = this;
+    setInterval(function(){
+      var cursor = that.state.current;
+
+      cursor++;
+      if (cursor > 15) {
+        cursor = 0;
+      }
+
+      console.log(cursor);
+
+      that.setState({current: cursor});
+    }, 100);
+    */
+  }
+
+  render() {
+    return (
+      <div className="sequenceTrack">
+        {[...Array(16)].map((x, i) =>
+          <SequenceItem key={i} selected={i === this.state.current} />
+        )}
+      </div>
+    )
+  }
+}
+
+var samplerReady = false;
+//var sampler = new Tone.Sampler("/audio/" + samples[0] + ".wav").toMaster();
+
+const NOTE_MODE = 0;
+const SAMPLE_SWITCH_MODE = 1;
+
+var keypadMode = NOTE_MODE
+
+var selectedSampler = 0;
+
+var samplers = [
+];
+
+for (var i = 0; i < samples.length; i++) {
+  samplers.push(new Tone.Sampler("/audio/" + samples[i] + ".wav").toMaster());
+}
+
+class NumButton extends Component {
+  constructor(props) {
+    super(props);
+
+    this.player = new Tone.Player("/audio/" + samples[props.num - 1] + ".wav").toMaster();
+  }
+
+  numKeyPress = (event) => {
+    event.preventDefault();
+    var props = this.props;
+
+    //samplers[selectedSampler].triggerAttack(props.num);
+  };
+
+
+  numKeyDown = (event) => {
+    event.preventDefault();
+    var props = this.props;
+    //console.log(props.num);
+
+
+    //this.player.loop = true;
+
+    //this.player.start();
+    //sampler.triggerAttack(-1);
+
+    switch (keypadMode) {
+      case NOTE_MODE:
+        samplers[selectedSampler].triggerAttack(props.num);
+        break;
+      case SAMPLE_SWITCH_MODE:
+        selectedSampler = this.props.num;
+        break;
+      default:
+        break;
+    }
+  };
+
+
+  numKeyUp = (event) => {
+    event.preventDefault();
+    //console.log(props.num);
+    //this.player.loop = false;
+    //this.player.stop();
+  };
+
+  render() {
+    var selectedSampleClass = (selectedSampler == this.props.num - 1) ? " num-selected" : "";
+    var classes = `button num${selectedSampleClass}`;
+    return (
+      <div className={classes}
+           onClick={this.numKeyPress}
+           onMouseDown={this.numKeyDown}
+           onTouchStart={this.numKeyDown}
+           onTouchEnd={this.numKeyUp}
+           onTouchCancel={this.numKeyUp}
+           onMouseUp={this.numKeyUp}>{this.props.label}</div>
+    )
+  }
+}
+
+class FuncButton extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <div className="button func">{this.props.label}</div>
+    )
+  }
+}
+
+
+class SoundSelectButton extends FuncButton {
+  state: {
+    active: boolean
+  }
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      active: false
+    };
+  }
+
+
+  sKeyDown = (event) => {
+    keypadMode = SAMPLE_SWITCH_MODE;
+    this.setState({active: true});
+  };
+
+
+  sKeyUp = (event) => {
+    keypadMode = NOTE_MODE;
+    this.setState({active: false});
+  };
+
+
+  render() {
+
+    var active = this.state.active ? "func-active" : "";
+    var classes = `button func ${active}`;
+    return (
+      <div className={classes} onMouseDown={this.sKeyDown}
+           onTouchStart={this.sKeyDown}
+           onTouchEnd={this.sKeyUp}
+           onTouchCancel={this.sKeyUp}
+           onMouseUp={this.sKeyUp}>{this.props.label}</div>
+    )
+  }
+}
+
+
+class Knob extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <div className="button knob">{this.props.label}</div>
+    )
+  }
+}
+
+class SixVencerKeyboard extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+
+  render() {
+    return (
+      <div>
+        <SoundSelectButton label="♪" />
+        <FuncButton label="𝄜" />
+        <FuncButton label="BPM" />
+        <Knob label="⟳" />
+        <Knob label="⟳" />
+        <br/>
+        <NumButton num="1" label="1" />
+        <NumButton num="2" label="2" />
+        <NumButton num="3" label="3" />
+        <NumButton num="4" label="4" />
+        <FuncButton label="F" />
+        <br/>
+        <NumButton num="5" label="5" />
+        <NumButton num="6" label="6" />
+        <NumButton num="7" label="7" />
+        <NumButton num="8" label="8" />
+        <FuncButton label="FX" />
+        <br/>
+        <NumButton num="9" label="9" />
+        <NumButton num="10" label="10" />
+        <NumButton num="11" label="11" />
+        <NumButton num="12" label="12" />
+        <FuncButton label="▶" />
+        <br/>
+        <NumButton num="13" label="13" />
+        <NumButton num="14" label="14" />
+        <NumButton num="15" label="15" />
+        <NumButton num="16" label="16" />
+        <FuncButton label="●" />
+        <br/>
+      </div>
+    )
+  }
+}
+
 
 class SampleSelector extends Component {
   state: {
@@ -176,7 +418,7 @@ function ShareDialog({hash, closeDialog}) {
   );
 }
 
-class App extends Component {
+class App_old extends Component {
   loop: Tone.Sequence;
 
   state: {
@@ -329,6 +571,17 @@ class App extends Component {
             deleteTrack={this.deleteTrack} />
           <Controls {...{bpm, updateBPM, playing, start, stop, addTrack, share}} />
         </table>
+      </div>
+    );
+  }
+}
+
+class App extends Component {
+  render() {
+    return (
+      <div>
+        <SequenceLine />
+        <SixVencerKeyboard />
       </div>
     );
   }
