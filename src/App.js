@@ -97,10 +97,18 @@ for (var i = 0; i < samples.length; i++) {
 }
 
 class NumButton extends Component {
+
+  state: {
+    selected: boolean
+  };
   constructor(props) {
     super(props);
 
-    this.player = new Tone.Player("/audio/" + samples[props.num - 1] + ".wav").toMaster();
+    this.data = {
+      selected: false
+    }
+
+    //this.player = new Tone.Player("/audio/" + samples[props.num - 1] + ".wav").toMaster();
   }
 
   numKeyPress = (event) => {
@@ -127,7 +135,8 @@ class NumButton extends Component {
         samplers[selectedSampler].triggerAttack(props.num);
         break;
       case SAMPLE_SWITCH_MODE:
-        selectedSampler = this.props.num;
+        selectedSampler = this.props.num - 1;
+        this.setState({selected: !this.data.selected});
         break;
       default:
         break;
@@ -143,7 +152,8 @@ class NumButton extends Component {
   };
 
   render() {
-    var selectedSampleClass = (selectedSampler == this.props.num - 1) ? " num-selected" : "";
+    //var selectedSampleClass = (selectedSampler == this.props.num - 1) ? " num-selected" : "";
+    var selectedSampleClass = this.data.selected ? " num-selected" : "";
     var classes = `button num${selectedSampleClass}`;
     return (
       <div className={classes}
