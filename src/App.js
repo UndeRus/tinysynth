@@ -132,7 +132,7 @@ class NumButton extends Component {
 
     switch (keypadMode) {
       case NOTE_MODE:
-        samplers[selectedSampler].triggerAttack(props.num);
+        samplers[selectedSampler].triggerAttackRelease(props.num, "1n");
         break;
       case SAMPLE_SWITCH_MODE:
         selectedSampler = this.props.num - 1;
@@ -162,7 +162,11 @@ class NumButton extends Component {
            onTouchStart={this.numKeyDown}
            onTouchEnd={this.numKeyUp}
            onTouchCancel={this.numKeyUp}
-           onMouseUp={this.numKeyUp}>{this.props.label}</div>
+           onMouseUp={this.numKeyUp}>
+           <div className="num-label">
+           {this.props.label}
+           </div>
+      </div>
     )
   }
 }
