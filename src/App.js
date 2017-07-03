@@ -38,28 +38,61 @@ class SequencerStore {
 
   @observable numButtons;
 
+  //@observable
+
 
 	constructor() {
 
     this.numButtons =
     [
-      true,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false
+      {
+        sampleSelected: true
+      },
+      {
+        sampleSelected: false
+      },
+      {
+        sampleSelected: false
+      },
+      {
+        sampleSelected: false
+      },
+      {
+        sampleSelected: false
+      },
+      {
+        sampleSelected: false
+      },
+      {
+        sampleSelected: false
+      },
+      {
+        sampleSelected: false
+      },
+      {
+        sampleSelected: false
+      },
+      {
+        sampleSelected: false
+      },
+      {
+        sampleSelected: false
+      },
+      {
+        sampleSelected: false
+      },
+      {
+        sampleSelected: false
+      },
+      {
+        sampleSelected: false
+      },
+      {
+        sampleSelected: false
+      },
+      {
+        sampleSelected: false
+      }
     ];
 		autorun(() => console.log("event emitted"));
 	}
@@ -67,9 +100,9 @@ class SequencerStore {
   setSamplerActive(samplerId) {
     for (var i = 0; i < this.numButtons.length; i++) {
       if (samplerId === i) {
-        this.numButtons[i] = true;
+        this.numButtons[i].sampleSelected = true;
       } else {
-        this.numButtons[i] = false;
+        this.numButtons[i].sampleSelected = false;
       }
     }
   }
@@ -189,7 +222,7 @@ class NumButton extends Component {
     const buttonState = this.props.state;
     //var selectedSampleClass = (selectedSampler == this.props.num - 1) ? " num-selected" : "";
     //var selectedSampleClass = this.data.selected ? " num-selected" : "";
-    var selectedSampleClass = buttonState ? " num-selected" : "";;
+    var selectedSampleClass = buttonState.sampleSelected ? " num-selected" : "";;
     var classes = `button num${selectedSampleClass}`;
     return (
       <div className={classes}
