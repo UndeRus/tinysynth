@@ -4,21 +4,22 @@
   "private": true,
   "homepage": "http://n1k0.github.io/tinysynth",
   "scripts": {
-    "deploy": "npm run build && gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
   "dependencies": {
-    "react": "^15.3.2",
-    "react-dom": "^15.3.2",
+    "custom-react-scripts": "0.0.23",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
     "react-mdl": "^1.7.2",
+    "mobx": "^3.1.16",
+    "mobx-react": "^4.2.2",
     "tone": "^0.10.0"
   },
   "devDependencies": {
     "flow-bin": "^0.33.0",
-    "gh-pages": "^0.11.0",
-    "react-scripts": "0.7.0"
+    "gh-pages": "^0.11.0"
   }
 }

@@ -21,10 +21,61 @@ import "./App.css";
 import "react-mdl/extra/css/material.light_blue-pink.min.css";
 import "react-mdl/extra/material.js";
 
+
+import {autorun, observable} from 'mobx';
+import {observer} from 'mobx-react';
+
 import * as sequencer from "./sequencer";
 import * as model from "./model";
 import samples from "./samples.json";
 
+
+class SequencerStore {
+	@observable playState;
+	@observable selectMode;
+	@observable selectedSample;
+	@observable sequencePosition;
+
+  @observable numButtons;
+
+
+	constructor() {
+
+    this.numButtons =
+    [
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ];
+		autorun(() => console.log("event emitted"));
+	}
+
+  setSamplerActive(samplerId) {
+    for (var i = 0; i < this.numButtons.length; i++) {
+      if (samplerId === i) {
+        this.numButtons[i] = true;
+      } else {
+        this.numButtons[i] = false;
+      }
+    }
+  }
+}
+
+@observer
 class SequenceItem extends Component {
   constructor(props) {
     super(props);
@@ -37,7 +88,7 @@ class SequenceItem extends Component {
   }
 }
 
-
+@observer
 class SequenceLine extends Component {
   state: {
     current: number,
@@ -96,6 +147,7 @@ for (var i = 0; i < samples.length; i++) {
   samplers.push(new Tone.Sampler("/audio/" + samples[i] + ".wav").toMaster());
 }
 
+@observer
 class NumButton extends Component {
 
   state: {
@@ -103,32 +155,17 @@ class NumButton extends Component {
   };
   constructor(props) {
     super(props);
-
-    this.data = {
-      selected: false
-    }
-
-    //this.player = new Tone.Player("/audio/" + samples[props.num - 1] + ".wav").toMaster();
   }
 
   numKeyPress = (event) => {
     event.preventDefault();
     var props = this.props;
-
-    //samplers[selectedSampler].triggerAttack(props.num);
   };
 
 
   numKeyDown = (event) => {
     event.preventDefault();
     var props = this.props;
-    //console.log(props.num);
-
-
-    //this.player.loop = true;
-
-    //this.player.start();
-    //sampler.triggerAttack(-1);
 
     switch (keypadMode) {
       case NOTE_MODE:
@@ -136,7 +173,7 @@ class NumButton extends Component {
         break;
       case SAMPLE_SWITCH_MODE:
         selectedSampler = this.props.num - 1;
-        this.setState({selected: !this.data.selected});
+        sequencerStore.setSamplerActive(selectedSampler);
         break;
       default:
         break;
@@ -146,14 +183,13 @@ class NumButton extends Component {
 
   numKeyUp = (event) => {
     event.preventDefault();
-    //console.log(props.num);
-    //this.player.loop = false;
-    //this.player.stop();
   };
 
   render() {
+    const buttonState = this.props.state;
     //var selectedSampleClass = (selectedSampler == this.props.num - 1) ? " num-selected" : "";
-    var selectedSampleClass = this.data.selected ? " num-selected" : "";
+    //var selectedSampleClass = this.data.selected ? " num-selected" : "";
+    var selectedSampleClass = buttonState ? " num-selected" : "";;
     var classes = `button num${selectedSampleClass}`;
     return (
       <div className={classes}
@@ -171,6 +207,7 @@ class NumButton extends Component {
   }
 }
 
+@observer
 class FuncButton extends Component {
   constructor(props) {
     super(props);
@@ -237,6 +274,7 @@ class Knob extends Component {
   }
 }
 
+@observer
 class SixVencerKeyboard extends Component {
   constructor(props) {
     super(props);
@@ -244,6 +282,7 @@ class SixVencerKeyboard extends Component {
 
 
   render() {
+    const buttons = this.props.numButtons
     return (
       <div>
         <SoundSelectButton label="♪" />
@@ -252,28 +291,28 @@ class SixVencerKeyboard extends Component {
         <Knob label="⟳" />
         <Knob label="⟳" />
         <br/>
-        <NumButton num="1" label="1" />
-        <NumButton num="2" label="2" />
-        <NumButton num="3" label="3" />
-        <NumButton num="4" label="4" />
+        <NumButton state={buttons[0]} num="1" label="1" />
+        <NumButton state={buttons[1]} num="2" label="2" />
+        <NumButton state={buttons[2]} num="3" label="3" />
+        <NumButton state={buttons[3]} num="4" label="4" />
         <FuncButton label="F" />
         <br/>
-        <NumButton num="5" label="5" />
-        <NumButton num="6" label="6" />
-        <NumButton num="7" label="7" />
-        <NumButton num="8" label="8" />
+        <NumButton state={buttons[4]} num="5" label="5" />
+        <NumButton state={buttons[5]} num="6" label="6" />
+        <NumButton state={buttons[6]} num="7" label="7" />
+        <NumButton state={buttons[7]} num="8" label="8" />
         <FuncButton label="FX" />
         <br/>
-        <NumButton num="9" label="9" />
-        <NumButton num="10" label="10" />
-        <NumButton num="11" label="11" />
-        <NumButton num="12" label="12" />
+        <NumButton state={buttons[8]} num="9" label="9" />
+        <NumButton state={buttons[9]} num="10" label="10" />
+        <NumButton state={buttons[10]} num="11" label="11" />
+        <NumButton state={buttons[11]} num="12" label="12" />
         <FuncButton label="▶" />
         <br/>
-        <NumButton num="13" label="13" />
-        <NumButton num="14" label="14" />
-        <NumButton num="15" label="15" />
-        <NumButton num="16" label="16" />
+        <NumButton state={buttons[12]} num="13" label="13" />
+        <NumButton state={buttons[13]} num="14" label="14" />
+        <NumButton state={buttons[14]} num="15" label="15" />
+        <NumButton state={buttons[15]} num="16" label="16" />
         <FuncButton label="●" />
         <br/>
       </div>
@@ -590,14 +629,24 @@ class App_old extends Component {
   }
 }
 
-class App extends Component {
+class SixVencer extends Component {
   render() {
+    const store = this.props.store;
     return (
       <div>
         <SequenceLine />
-        <SixVencerKeyboard />
+        <SixVencerKeyboard numButtons={ store.numButtons } />
       </div>
-    );
+    )
+  }
+}
+const sequencerStore = new SequencerStore();
+
+class App extends Component {
+  render() {
+    return (
+      <SixVencer store={ sequencerStore } />
+    )
   }
 }
 
