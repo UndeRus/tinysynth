@@ -38,7 +38,7 @@ class SequencerStore {
 
   @observable numButtons;
 
-  //@observable
+  @observable tracks;
 
 
 	constructor() {
@@ -94,6 +94,26 @@ class SequencerStore {
         sampleSelected: false
       }
     ];
+
+    // Create empty track for each sample
+    this.tracks = [
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      []
+    ]
 		autorun(() => console.log("event emitted"));
 	}
 
