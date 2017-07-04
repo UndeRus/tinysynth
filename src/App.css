@@ -59,29 +59,32 @@
 
 .sequenceTrack {
   height: 2em;
-  width: 20em;
   background-color: #41046F;
   text-align: center;
   vertical-align: baseline;
 }
 
 .sequenceItemCurrent {
-  height: 1em;
-  width: 1em;
+  height: 6vw;
+  width: 6vw;
   background-color: #FF9000;
   display: inline-block;
 }
 
 .sequenceItem {
-  height: 1em;
-  width: 1em;
+  height: 6vw;
+  width: 6vw;
   background-color: #007B25;
   display: inline-block;
 }
 
 .button {
+  /*
   height: 60px;
   width: 60px;
+  */
+  height: 19vw;
+  width: 19vw;
   border: 1px solid gray;
   display: inline-block;
   text-align: center;
@@ -107,7 +110,7 @@
 }
 
 .num-label {
-  
+
 }
 
 .func {

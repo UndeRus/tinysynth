@@ -43,6 +43,8 @@ const STOPPED = 0;
 
 const NOTE_MODE = 0;
 const SAMPLE_SWITCH_MODE = 1;
+const TRACK_SWITCH_MODE = 2;
+const RECORD_MODE = 3;
 
 var keypadMode = NOTE_MODE
 
@@ -92,9 +94,9 @@ class SequencerStore {
     for (var i = 0; i < 16; i++) {
         var pitches = [];
         for (var j = 0; j < 16; j++) {
-          //pitches.push(null);
+          pitches.push(null);
           //FOR TEST PURPOSES ONLY
-          pitches.push(Math.floor(Math.random() * 16));
+          //pitches.push(Math.floor(Math.random() * 16));
         }
         this.tracks.push(pitches);
     }
@@ -132,12 +134,40 @@ class SequencerStore {
     if (this.playState === PLAYING) {
       this.loop.stop();
       this.playState = STOPPED;
+      this.sequencePosition = 0;
     } else if (this.playState === STOPPED) {
       this.loop.start();
       this.playState = PLAYING;
     }
 
     //console.log(this.playState);
+  }
+
+  putNote(samplerIndex, position, pitch) {
+    const currentPitch = this.tracks[samplerIndex][position];
+    if (currentPitch == pitch) {
+      this.tracks[samplerIndex][position] = null;
+    } else {
+      this.tracks[samplerIndex][position] = pitch;
+    }
+  }
+
+  moveCursorNext() {
+    var curPos = this.sequencePosition;
+    if (curPos === 15) {
+      this.sequencePosition = 0;
+    } else {
+      this.sequencePosition = curPos + 1;
+    }
+  }
+
+  moveCursorPrev() {
+    var curPos = this.sequencePosition;
+    if (curPos === 0) {
+      this.sequencePosition = 15;
+    } else {
+      this.sequencePosition = curPos - 1;
+    }
   }
 }
 
@@ -229,6 +259,11 @@ class NumButton extends Component {
         selectedSampler = this.props.num - 1;
         sequencerStore.setSamplerActive(selectedSampler);
         break;
+      case RECORD_MODE:
+        //TODO: record current sample to sequence
+        sequencerStore.putNote(selectedSampler, sequencerStore.sequencePosition, props.num);
+        sequencerStore.moveCursorNext();
+        break;
       default:
         break;
     }
@@ -276,6 +311,35 @@ class FuncButton extends Component {
   }
 }
 
+
+class NextSeqButton extends FuncButton {
+  render() {
+    return (
+      <div className="button func" onClick={this.onClick}>{this.props.label}</div>
+    )
+  }
+
+  onClick = (event) => {
+    event.preventDefault();
+
+    sequencerStore.moveCursorNext();
+  }
+}
+
+
+class PrevSeqButton extends FuncButton {
+  render() {
+    return (
+      <div className="button func" onClick={this.onClick}>{this.props.label}</div>
+    )
+  }
+
+  onClick = (event) => {
+    event.preventDefault();
+
+    sequencerStore.moveCursorPrev();
+  }
+}
 
 class SoundSelectButton extends FuncButton {
   state: {
@@ -339,6 +403,49 @@ class PlayStopButton extends Component {
   }
 }
 
+
+class RecordButton extends Component {
+  state: {
+    active: false
+  }
+
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      active: false
+    };
+  }
+
+  render() {
+    var active = this.state.active ? "func-active" : "";
+    var classes = `button func ${active}`;
+    return (
+      <div className={classes}
+           onContextMenu={() => false}
+           onTouchStart={this.onDown}
+           onTouchEnd={this.onUp}
+           onMouseDown={this.onDown}
+           onMouseUp={this.onUp}>{this.props.label}</div>
+    )
+  }
+
+  onDown = (event) => {
+    event.preventDefault();
+    console.log("RECORD MODE");
+    this.setState({active: true});
+    keypadMode = RECORD_MODE;
+  }
+
+  onUp = (event) => {
+    event.preventDefault();
+    console.log("NOTE MODE");
+    this.setState({active: false});
+    keypadMode = NOTE_MODE;
+  }
+}
+
 class Knob extends Component {
   /*
   constructor(props) {
@@ -366,7 +473,7 @@ class SixVencerKeyboard extends Component {
     const buttons = this.props.numButtons
     const store = this.props.store;
     return (
-      <div>
+      <div style={{textAlign: "center"}}>
         <SoundSelectButton label="♪" />
         <FuncButton label="𝄜" />
         <FuncButton label="BPM" />
@@ -395,7 +502,10 @@ class SixVencerKeyboard extends Component {
         <NumButton state={buttons[13]} num="14" label="14" />
         <NumButton state={buttons[14]} num="15" label="15" />
         <NumButton state={buttons[15]} num="16" label="16" />
-        <FuncButton label="●" />
+        <RecordButton label="●" />
+        <br/>
+        <PrevSeqButton label="&lt;" />
+        <NextSeqButton label="&gt;" />
         <br/>
       </div>
     )
