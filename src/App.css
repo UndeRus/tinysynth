@@ -121,6 +121,18 @@
   border: 1px solid red;
 }
 
+.track-enabled {
+  width: 2vw;
+  height: 2vw;
+  background: green;
+}
+
+.track-disabled {
+  width: 2vw;
+  height: 2vw;
+  background: red;
+}
+
 .knob {
   background-color: #FF9000;
 }

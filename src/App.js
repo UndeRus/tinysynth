@@ -72,6 +72,9 @@ class SequencerStore {
   tracks;
 
 
+  @observable tracksEnabled = [];
+
+
 	constructor() {
 
     this.numButtons =
@@ -87,6 +90,8 @@ class SequencerStore {
       this.numButtons.push({
         sampleSelected: false
       });
+
+      this.tracksEnabled.push(true);
     }
 
     this.tracks = [];
@@ -95,8 +100,6 @@ class SequencerStore {
         var pitches = [];
         for (var j = 0; j < 16; j++) {
           pitches.push(null);
-          //FOR TEST PURPOSES ONLY
-          //pitches.push(Math.floor(Math.random() * 16));
         }
         this.tracks.push(pitches);
     }
@@ -107,6 +110,9 @@ class SequencerStore {
     var steps = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
     this.loop = new Tone.Sequence((time, index) => {
       for (let i = 0; i < this.tracks.length; i++) {
+        if (this.tracksEnabled[i] === false) {
+          continue;
+        }
         var note = this.tracks[i][index];
         if (note != null) {
           samplers[i].triggerAttackRelease(note, "1n");
@@ -145,7 +151,7 @@ class SequencerStore {
 
   putNote(samplerIndex, position, pitch) {
     const currentPitch = this.tracks[samplerIndex][position];
-    if (currentPitch == pitch) {
+    if (currentPitch === pitch) {
       this.tracks[samplerIndex][position] = null;
     } else {
       this.tracks[samplerIndex][position] = pitch;
@@ -263,6 +269,10 @@ class NumButton extends Component {
         //TODO: record current sample to sequence
         sequencerStore.putNote(selectedSampler, sequencerStore.sequencePosition, props.num);
         sequencerStore.moveCursorNext();
+        samplers[selectedSampler].triggerAttackRelease(props.num, "1n");
+        break;
+      case TRACK_SWITCH_MODE:
+        sequencerStore.tracksEnabled[props.num - 1] = !sequencerStore.tracksEnabled[props.num - 1];
         break;
       default:
         break;
@@ -280,6 +290,9 @@ class NumButton extends Component {
     //var selectedSampleClass = this.data.selected ? " num-selected" : "";
     var selectedSampleClass = buttonState.sampleSelected ? " num-selected" : "";;
     var classes = `button num${selectedSampleClass}`;
+    var trackEnabled = sequencerStore.tracksEnabled[this.props.num - 1];
+
+    var enabledClass = trackEnabled ? "track-enabled" : "track-disabled";
     return (
       <div className={classes}
            onClick={this.numKeyPress}
@@ -291,6 +304,7 @@ class NumButton extends Component {
            <div className="num-label">
            {this.props.label}
            </div>
+           <div className={enabledClass} />
       </div>
     )
   }
@@ -357,6 +371,46 @@ class SoundSelectButton extends FuncButton {
 
   sKeyDown = (event) => {
     keypadMode = SAMPLE_SWITCH_MODE;
+    this.setState({active: true});
+  };
+
+
+  sKeyUp = (event) => {
+    keypadMode = NOTE_MODE;
+    this.setState({active: false});
+  };
+
+
+  render() {
+
+    var active = this.state.active ? "func-active" : "";
+    var classes = `button func ${active}`;
+    return (
+      <div className={classes} onMouseDown={this.sKeyDown}
+           onTouchStart={this.sKeyDown}
+           onTouchEnd={this.sKeyUp}
+           onTouchCancel={this.sKeyUp}
+           onMouseUp={this.sKeyUp}>{this.props.label}</div>
+    )
+  }
+}
+
+class TrackSwitchButton extends Component {
+  state: {
+    active: boolean
+  }
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      active: false
+    };
+  }
+
+
+  sKeyDown = (event) => {
+    keypadMode = TRACK_SWITCH_MODE;
     this.setState({active: true});
   };
 
@@ -475,7 +529,7 @@ class SixVencerKeyboard extends Component {
     return (
       <div style={{textAlign: "center"}}>
         <SoundSelectButton label="♪" />
-        <FuncButton label="𝄜" />
+        <TrackSwitchButton label="𝄜" />
         <FuncButton label="BPM" />
         <Knob label="⟳" />
         <Knob label="⟳" />
