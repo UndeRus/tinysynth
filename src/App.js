@@ -45,6 +45,7 @@ const NOTE_MODE = 0;
 const SAMPLE_SWITCH_MODE = 1;
 const TRACK_SWITCH_MODE = 2;
 const RECORD_MODE = 3;
+const BPM_MODE = 4;
 
 var keypadMode = NOTE_MODE
 
@@ -66,6 +67,8 @@ class SequencerStore {
 
   @observable numButtons;
 
+  @observable bpm;
+
   loop;
 
   //@observable
@@ -83,6 +86,8 @@ class SequencerStore {
         sampleSelected: true
       }
     ];
+
+    this.bpm = Tone.Transport.bpm.value;
 
     //this.playState = STOPPED;
 
@@ -332,14 +337,21 @@ class FuncButton extends Component {
 class NextSeqButton extends FuncButton {
   render() {
     return (
-      <div className="button func" onClick={this.onClick}>{this.props.label}</div>
+      <div className="button func" onMouseDown={this.onClick}  onTouchEnd={this.onClick}>{this.props.label}</div>
     )
   }
 
   onClick = (event) => {
     event.preventDefault();
+    switch (keypadMode) {
+      case NOTE_MODE:
+        sequencerStore.moveCursorNext();
+        break;
+      case BPM_MODE:
+        sequencerStore.bpm += 5;
+        Tone.Transport.bpm.rampTo(sequencerStore.bpm, 1);
+    }
 
-    sequencerStore.moveCursorNext();
   }
 }
 
@@ -347,14 +359,21 @@ class NextSeqButton extends FuncButton {
 class PrevSeqButton extends FuncButton {
   render() {
     return (
-      <div className="button func" onClick={this.onClick}>{this.props.label}</div>
+      <div className="button func" onMouseDown={this.onClick} onTouchEnd={this.onClick}>{this.props.label}</div>
     )
   }
 
   onClick = (event) => {
     event.preventDefault();
 
-    sequencerStore.moveCursorPrev();
+    switch (keypadMode) {
+      case NOTE_MODE:
+        sequencerStore.moveCursorPrev();
+        break;
+      case BPM_MODE:
+        sequencerStore.bpm -= 5;
+        Tone.Transport.bpm.rampTo(sequencerStore.bpm, 1);
+    }
   }
 }
 
@@ -503,6 +522,50 @@ class RecordButton extends Component {
   }
 }
 
+@observer
+class BPMButton extends Component {
+  state: {
+    active: false
+  }
+
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      active: false
+    };
+  }
+
+  render() {
+    var active = this.state.active ? "func-active" : "";
+    var classes = `button func ${active}`;
+    var content = `BPM ${sequencerStore.bpm}`;
+    return (
+      <div className={classes}
+           onContextMenu={() => false}
+           onTouchStart={this.onDown}
+           onTouchEnd={this.onUp}
+           onMouseDown={this.onDown}
+           onMouseUp={this.onUp}>{content}</div>
+    )
+  }
+
+  onDown = (event) => {
+    event.preventDefault();
+    console.log("BPM MODE");
+    this.setState({active: true});
+    keypadMode = BPM_MODE;
+  }
+
+  onUp = (event) => {
+    event.preventDefault();
+    console.log("NOTE MODE");
+    this.setState({active: false});
+    keypadMode = NOTE_MODE;
+  }
+}
+
 class Knob extends Component {
   /*
   constructor(props) {
@@ -533,7 +596,7 @@ class SixVencerKeyboard extends Component {
       <div style={{textAlign: "center"}}>
         <SoundSelectButton label="♪" />
         <TrackSwitchButton label="𝄜" />
-        <FuncButton label="BPM" />
+        <BPMButton label="BPM" />
         <Knob label="⟳" />
         <Knob label="⟳" />
         <br/>
