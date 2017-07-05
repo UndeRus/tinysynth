@@ -539,7 +539,7 @@ class BPMButton extends Component {
 
   render() {
     var active = this.state.active ? "func-active" : "";
-    var classes = `button func ${active}`;
+    var classes = `button knob ${active}`;
     var content = `BPM ${sequencerStore.bpm}`;
     return (
       <div className={classes}
@@ -596,9 +596,9 @@ class SixVencerKeyboard extends Component {
       <div style={{textAlign: "center"}}>
         <SoundSelectButton label="♪" />
         <TrackSwitchButton label="𝄜" />
+        <FuncButton label="⟳" />
+        <Knob label="VOL" />
         <BPMButton label="BPM" />
-        <Knob label="⟳" />
-        <Knob label="⟳" />
         <br/>
         <NumButton state={buttons[0]} num="1" label="1" />
         <NumButton state={buttons[1]} num="2" label="2" />
