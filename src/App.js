@@ -189,8 +189,9 @@ class SequenceItem extends Component {
   */
 
   render() {
+    const classes= "sequenceItem" + (this.props.selected ? " sequenceItemCurrent": "");
     return (
-      <span className={this.props.selected ? "sequenceItemCurrent" : "sequenceItem"} />
+      <span className={classes} />
     )
   }
 }

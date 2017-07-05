@@ -65,17 +65,20 @@
 }
 
 .sequenceItemCurrent {
-  height: 6vw;
-  width: 6vw;
-  background-color: #FF9000;
-  display: inline-block;
+  background-color: #FF9000 !important;
 }
 
 .sequenceItem {
-  height: 6vw;
-  width: 6vw;
+  height: 5.5vw;
+  width: 5.5vw;
   background-color: #007B25;
   display: inline-block;
+  border: solid 1px #FF9000;
+}
+
+.sequenceItem:nth-child(4n) {
+  border-right-width: 3px;
+  border-right-color: black;
 }
 
 .button {
