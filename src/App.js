@@ -118,7 +118,9 @@ class SequencerStore {
           samplers[i].triggerAttackRelease(note, "8n");
         }
       }
-      this.sequencePosition = index;
+      Tone.Draw.schedule((time) => {
+        this.sequencePosition = index;
+      }, "+0.01")
       //console.log(time, index);
     }, steps, "8n");
     Tone.Transport.start();
