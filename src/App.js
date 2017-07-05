@@ -46,6 +46,7 @@ const SAMPLE_SWITCH_MODE = 1;
 const TRACK_SWITCH_MODE = 2;
 const RECORD_MODE = 3;
 const BPM_MODE = 4;
+const VOLUME_MODE = 5;
 
 var keypadMode = NOTE_MODE
 
@@ -64,6 +65,7 @@ class SequencerStore {
 	@observable selectMode;
 	@observable selectedSample;
 	@observable sequencePosition = 0;
+  @observable volumes = [];
 
   @observable numButtons;
 
@@ -97,6 +99,7 @@ class SequencerStore {
       });
 
       this.tracksEnabled.push(true);
+      this.volumes.push(100);
     }
 
     this.tracks = [];
@@ -301,6 +304,8 @@ class NumButton extends Component {
     var trackEnabled = sequencerStore.tracksEnabled[this.props.num - 1];
 
     var enabledClass = trackEnabled ? "track-enabled" : "track-disabled";
+
+    const volumeHeight = `${sequencerStore.volumes[this.props.num - 1]}%`;
     return (
       <div className={classes}
            onClick={this.numKeyPress}
@@ -309,10 +314,13 @@ class NumButton extends Component {
            onTouchEnd={this.numKeyUp}
            onTouchCancel={this.numKeyUp}
            onMouseUp={this.numKeyUp}>
-           <div className="num-label">
-           {this.props.label}
-           </div>
-           <div className={enabledClass} />
+             <div className="num-label">
+             {this.props.label}
+             </div>
+             <div className={enabledClass} />
+             <div style={{"height": "12vw", "width": "10%"}}>
+              <div style={{"height": volumeHeight, "backgroundColor": "#FF9000"}}></div>
+             </div>
       </div>
     )
   }
@@ -334,10 +342,17 @@ class FuncButton extends Component {
 }
 
 
+// DECIBELS
+// -20...0
+
+function percent2decibel(percent: number){
+  return -20. / 100 * (100 - percent);
+}
+
 class NextSeqButton extends FuncButton {
   render() {
     return (
-      <div className="button func" onMouseDown={this.onClick}  onTouchEnd={this.onClick}>{this.props.label}</div>
+      <div className="button func arrow" onMouseDown={this.onClick}  onTouchEnd={this.onClick}>{this.props.label}</div>
     )
   }
 
@@ -351,6 +366,15 @@ class NextSeqButton extends FuncButton {
         sequencerStore.bpm += 5;
         Tone.Transport.bpm.rampTo(sequencerStore.bpm, 1);
         break;
+      case VOLUME_MODE:
+        var currentVolume = sequencerStore.volumes[selectedSampler];
+        if (currentVolume === 100) {
+          return;
+        }
+        currentVolume += 1;
+        sequencerStore.volumes[selectedSampler] = currentVolume;
+        samplers[selectedSampler].volume.rampTo(percent2decibel(currentVolume), 1);
+        break;
       default:
         break;
     }
@@ -362,7 +386,7 @@ class NextSeqButton extends FuncButton {
 class PrevSeqButton extends FuncButton {
   render() {
     return (
-      <div className="button func" onMouseDown={this.onClick} onTouchEnd={this.onClick}>{this.props.label}</div>
+      <div className="button func arrow" onMouseDown={this.onClick} onTouchEnd={this.onClick}>{this.props.label}</div>
     )
   }
 
@@ -376,6 +400,15 @@ class PrevSeqButton extends FuncButton {
       case BPM_MODE:
         sequencerStore.bpm -= 5;
         Tone.Transport.bpm.rampTo(sequencerStore.bpm, 1);
+        break;
+      case VOLUME_MODE:
+        var currentVolume = sequencerStore.volumes[selectedSampler];
+        if (currentVolume === 0) {
+          return;
+        }
+        currentVolume -= 1;
+        sequencerStore.volumes[selectedSampler] = currentVolume;
+        samplers[selectedSampler].volume.rampTo(percent2decibel(currentVolume), 1);
         break;
       default:
         break;
@@ -572,19 +605,57 @@ class BPMButton extends Component {
   }
 }
 
-class Knob extends Component {
-  /*
+class VolumeButton extends Component {
+  state: {
+    active: false
+  }
+
+
   constructor(props) {
     super(props);
-  }
-  */
 
+    this.state = {
+      active: false
+    };
+  }
+
+  onDown = (event) => {
+    event.preventDefault();
+    console.log("VOLUME MODE");
+    this.setState({active: true});
+    keypadMode = VOLUME_MODE;
+  }
+
+  onUp = (event) => {
+    event.preventDefault();
+    console.log("NOTE MODE");
+    this.setState({active: false});
+    keypadMode = NOTE_MODE;
+  }
+
+  render() {
+    var active = this.state.active ? "func-active" : "";
+    var classes = `button knob ${active}`;
+    return (
+      <div className={classes}
+         onContextMenu={() => false}
+         onTouchStart={this.onDown}
+         onTouchEnd={this.onUp}
+         onMouseDown={this.onDown}
+         onMouseUp={this.onUp}>{this.props.label}</div>
+    )
+  }
+}
+
+/*
+class Knob extends Component {
   render() {
     return (
       <div className="button knob">{this.props.label}</div>
     )
   }
 }
+*/
 
 @observer
 class SixVencerKeyboard extends Component {
@@ -603,7 +674,7 @@ class SixVencerKeyboard extends Component {
         <SoundSelectButton label="♪" />
         <TrackSwitchButton label="𝄜" />
         <FuncButton label="⟳" />
-        <Knob label="VOL" />
+        <VolumeButton label="VOL" />
         <BPMButton label="BPM" />
         <br/>
         <NumButton state={buttons[0]} num="1" label="1" />

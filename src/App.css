@@ -58,7 +58,6 @@
 }
 
 .sequenceTrack {
-  height: 2em;
   background-color: #41046F;
   text-align: center;
   vertical-align: baseline;
@@ -116,6 +115,10 @@
 
 }
 
+.arrow {
+  float: left;
+}
+
 .func {
   background-color: #00BD39;
 }
@@ -127,7 +130,7 @@
 .track-enabled {
   width: 2vw;
   height: 2vw;
-  background: green;
+  background: #00BD39;
 }
 
 .track-disabled {
