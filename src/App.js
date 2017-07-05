@@ -350,6 +350,9 @@ class NextSeqButton extends FuncButton {
       case BPM_MODE:
         sequencerStore.bpm += 5;
         Tone.Transport.bpm.rampTo(sequencerStore.bpm, 1);
+        break;
+      default:
+        break;
     }
 
   }
@@ -373,6 +376,9 @@ class PrevSeqButton extends FuncButton {
       case BPM_MODE:
         sequencerStore.bpm -= 5;
         Tone.Transport.bpm.rampTo(sequencerStore.bpm, 1);
+        break;
+      default:
+        break;
     }
   }
 }
