@@ -115,12 +115,12 @@ class SequencerStore {
         }
         var note = this.tracks[i][index];
         if (note != null) {
-          samplers[i].triggerAttackRelease(note, "1n");
+          samplers[i].triggerAttackRelease(note, "8n");
         }
       }
       this.sequencePosition = index;
       //console.log(time, index);
-    }, steps, "16n");
+    }, steps, "8n");
     Tone.Transport.start();
 		autorun(() => console.log("event emitted"));
 	}
@@ -259,7 +259,7 @@ class NumButton extends Component {
 
     switch (keypadMode) {
       case NOTE_MODE:
-        samplers[selectedSampler].triggerAttackRelease(props.num, "1n");
+        samplers[selectedSampler].triggerAttackRelease(props.num, "8n");
         break;
       case SAMPLE_SWITCH_MODE:
         selectedSampler = this.props.num - 1;
@@ -269,7 +269,7 @@ class NumButton extends Component {
         //TODO: record current sample to sequence
         sequencerStore.putNote(selectedSampler, sequencerStore.sequencePosition, props.num);
         sequencerStore.moveCursorNext();
-        samplers[selectedSampler].triggerAttackRelease(props.num, "1n");
+        samplers[selectedSampler].triggerAttackRelease(props.num, "8n");
         break;
       case TRACK_SWITCH_MODE:
         sequencerStore.tracksEnabled[props.num - 1] = !sequencerStore.tracksEnabled[props.num - 1];
