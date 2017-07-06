@@ -47,6 +47,7 @@ const TRACK_SWITCH_MODE = 2;
 const RECORD_MODE = 3;
 const BPM_MODE = 4;
 const VOLUME_MODE = 5;
+const ERASE_MODE = 6;
 
 var keypadMode = NOTE_MODE
 
@@ -72,9 +73,7 @@ class SequencerStore {
   @observable bpm;
 
   loop;
-
-  //@observable
-  tracks;
+  @observable tracks;
 
 
   @observable tracksEnabled = [];
@@ -192,16 +191,54 @@ const sequencerStore = new SequencerStore();
 
 @observer
 class SequenceItem extends Component {
-  /*
-  constructor(props) {
-    super(props);
-  }
-  */
-
   render() {
     const classes= "sequenceItem" + (this.props.selected ? " sequenceItemCurrent": "");
     return (
-      <span className={classes} />
+      <span className={classes} >
+        <table style={{"width": "100%", "height": "100%"}}>
+          <tbody>
+            <tr>{[0, 1, 2, 3].map((x, i) => {
+                const enabled = sequencerStore.tracks[x][this.props.index] != null;
+                var style = {"width": "25%", "height": "25%"}
+                if (enabled) {
+                  style["backgroundColor"] = "red";
+                }
+                return (<td key={i} style={style} />)
+              })}
+            </tr>
+            <tr>{
+              [4, 5, 6, 7].map((x, i) => {
+                const enabled = sequencerStore.tracks[x][this.props.index] != null;
+                var style = {"width": "25%", "height": "25%"}
+                if (enabled) {
+                  style["backgroundColor"] = "red";
+                }
+                return (<td key={i} style={style} />)
+            })}
+            </tr>
+            <tr>{
+              [8, 9, 10, 11].map((x, i) => {
+                const enabled = sequencerStore.tracks[x][this.props.index] != null;
+                var style = {"width": "25%", "height": "25%"}
+                if (enabled) {
+                  style["backgroundColor"] = "red";
+                }
+                return (<td key={i} style={style} />)
+            })}
+            </tr>
+            <tr>{
+              [12, 13, 14, 15].map((x, i) => {
+                const enabled = sequencerStore.tracks[x][this.props.index] != null;
+                var style = {"width": "25%", "height": "25%"}
+                if (enabled) {
+                  style["backgroundColor"] = "red";
+                }
+                return (<td key={i} style={style} />)
+            })}
+            </tr>
+          </tbody>
+        </table>
+      </span>
     )
   }
 }
@@ -218,23 +255,6 @@ class SequenceLine extends Component {
     this.state = {
       current: 0
     }
-
-
-    /*
-    var that = this;
-    setInterval(function(){
-      var cursor = that.state.current;
-
-      cursor++;
-      if (cursor > 15) {
-        cursor = 0;
-      }
-
-      console.log(cursor);
-
-      that.setState({current: cursor});
-    }, 100);
-    */
   }
 
   render() {
@@ -242,7 +262,7 @@ class SequenceLine extends Component {
     return (
       <div className="sequenceTrack">
         {[...Array(16)].map((x, i) =>
-          <SequenceItem key={i} selected={i === position} />
+          <SequenceItem key={i} index={i} selected={i === position} />
         )}
       </div>
     )
@@ -252,15 +272,9 @@ class SequenceLine extends Component {
 
 @observer
 class NumButton extends Component {
-  /*
-  constructor(props) {
-    super(props);
-  }
-  */
 
   numKeyPress = (event) => {
     event.preventDefault();
-    //var props = this.props;
   };
 
 
@@ -284,6 +298,9 @@ class NumButton extends Component {
         break;
       case TRACK_SWITCH_MODE:
         sequencerStore.tracksEnabled[props.num - 1] = !sequencerStore.tracksEnabled[props.num - 1];
+        break;
+      case ERASE_MODE:
+        sequencerStore.tracks[props.num - 1][sequencerStore.sequencePosition] = null;
         break;
       default:
         break;
@@ -326,6 +343,47 @@ class NumButton extends Component {
   }
 }
 
+class EraseButton extends Component {
+  state: {
+    active: boolean
+  }
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      active: false
+    };
+  }
+
+
+  sKeyDown = (event) => {
+    keypadMode = ERASE_MODE;
+    console.log("ERASE MODE");
+    this.setState({active: true});
+  };
+
+
+  sKeyUp = (event) => {
+    keypadMode = NOTE_MODE;
+    this.setState({active: false});
+  };
+
+
+  render() {
+
+    var active = this.state.active ? "func-active" : "";
+    var classes = `button func ${active}`;
+    return (
+      <div className={classes} onMouseDown={this.sKeyDown}
+           onTouchStart={this.sKeyDown}
+           onTouchEnd={this.sKeyUp}
+           onTouchCancel={this.sKeyUp}
+           onMouseUp={this.sKeyUp}>{this.props.label}</div>
+    )
+  }
+}
+
 @observer
 class FuncButton extends Component {
   /*
@@ -363,6 +421,10 @@ class NextSeqButton extends FuncButton {
         sequencerStore.moveCursorNext();
         break;
       case BPM_MODE:
+        const currentBpm = sequencerStore.bpm;
+        if (currentBpm === 1000) {
+          return;
+        }
         sequencerStore.bpm += 5;
         Tone.Transport.bpm.rampTo(sequencerStore.bpm, 1);
         break;
@@ -398,6 +460,10 @@ class PrevSeqButton extends FuncButton {
         sequencerStore.moveCursorPrev();
         break;
       case BPM_MODE:
+        const currentBpm = sequencerStore.bpm;
+        if (currentBpm === 5) {
+          return;
+        }
         sequencerStore.bpm -= 5;
         Tone.Transport.bpm.rampTo(sequencerStore.bpm, 1);
         break;
@@ -673,7 +739,7 @@ class SixVencerKeyboard extends Component {
       <div style={{textAlign: "center"}}>
         <SoundSelectButton label="♪" />
         <TrackSwitchButton label="𝄜" />
-        <FuncButton label="⟳" />
+        <EraseButton label="C" />
         <VolumeButton label="VOL" />
         <BPMButton label="BPM" />
         <br/>
