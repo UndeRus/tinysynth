@@ -20,8 +20,10 @@ import {
 */
 
 import "./App.css";
+/*
 import "react-mdl/extra/css/material.light_blue-pink.min.css";
 import "react-mdl/extra/material.js";
+*/
 
 
 import {autorun, observable} from 'mobx';
