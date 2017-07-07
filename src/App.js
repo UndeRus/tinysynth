@@ -128,11 +128,10 @@ class SequencerStore {
           samplers[i].triggerAttackRelease(note, "8n", "+0.05");
         }
       }
-      /*
+
       Tone.Draw.schedule((asdf) => {
         this.sequencePosition = index;
       }, time);
-      */
       //console.log(time, index);
     }, steps, "8n");
 
