@@ -1,3 +1,5 @@
-# tinysynth
+# SixVencer
 
-This experiment might be renamed *tinytracks* later at some point, depending on what it becomes.
+Experiment to create mobile html5 sequencer with controls like Pocket Operator by teenage engineering©
+
+Manual:![here](http://m.jugregator.org/sixvencer-manual.png)

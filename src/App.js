@@ -62,6 +62,9 @@ for (var i = 0; i < samples.length; i++) {
   samplers.push(new Tone.Sampler("/audio/" + samples[i] + ".wav").toMaster());
 }
 
+//Tone.context.latencyHint = 'fastest';
+Tone.context.latencyHint = 0.05;
+
 
 class SequencerStore {
 	@observable playState = STOPPED;
@@ -124,15 +127,18 @@ class SequencerStore {
         }
         var note = this.tracks[i][index];
         if (note != null) {
-          samplers[i].triggerAttackRelease(note, "8n");
+          samplers[i].triggerAttackRelease(note, "8n", "+0.05");
         }
       }
-      Tone.Draw.schedule((time) => {
+
+      Tone.Draw.schedule((asdf) => {
         this.sequencePosition = index;
-      }, "+0.01")
+      }, time);
       //console.log(time, index);
     }, steps, "8n");
-    Tone.Transport.start();
+
+    this.loop.humanize = false;
+    Tone.Transport.start("+0.1");
 		autorun(() => console.log("event emitted"));
 	}
 
@@ -152,21 +158,19 @@ class SequencerStore {
       this.loop.stop();
       this.playState = STOPPED;
       this.sequencePosition = 0;
+      //Tone.context.latencyHint = "interactive";
     } else if (this.playState === STOPPED) {
       this.loop.start();
       this.playState = PLAYING;
+      //Tone.context.latencyHint = "playback";
     }
 
     //console.log(this.playState);
   }
 
   putNote(samplerIndex, position, pitch) {
-    const currentPitch = this.tracks[samplerIndex][position];
-    if (currentPitch === pitch) {
-      this.tracks[samplerIndex][position] = null;
-    } else {
-      this.tracks[samplerIndex][position] = pitch;
-    }
+    //const currentPitch = this.tracks[samplerIndex][position];
+    this.tracks[samplerIndex][position] = pitch;
   }
 
   moveCursorNext() {
@@ -185,6 +189,25 @@ class SequencerStore {
     } else {
       this.sequencePosition = curPos - 1;
     }
+  }
+
+
+  getJson() {
+    return {
+      volumes: this.volumes,
+      tracks: this.tracks,
+      tracksEnabled: this.tracksEnabled,
+      bpm: this.bpm
+    }
+  }
+
+  loadJson(json) {
+    this.loop.stop();
+    this.volumes = json.volumes;
+    this.tracks = json.tracks;
+    this.tracksEnabled = json.tracksEnabled;
+    this.bpm = json.bpm;
+    Tone.Transport.bpm.rampTo(this.bpm);
   }
 }
 
@@ -777,6 +800,73 @@ class SixVencerKeyboard extends Component {
   }
 }
 
+var currentSong = 0;
+
+class SaveButton extends Component {
+  render() {
+    const style = {"height": "19vw", "width": "19%", "backgroundColor": "orange", "border": "1px solid gray", "display": "inline-block", "color": "white", "textAlign": "center"};
+    return (
+      <span style={style} onClick={this.onClick}>S</span>
+    )
+  }
+
+  onClick = (e) => {
+    console.log(currentSong);
+    const songJson = sequencerStore.getJson();
+
+    localStorage.setItem("song" + currentSong, JSON.stringify(songJson));
+  }
+}
+
+class LoadButton extends Component {
+  render() {
+    const style = {"height": "19vw", "width": "19%", "backgroundColor": "orange", "border": "1px solid gray", "display": "inline-block", "color": "white", "textAlign": "center"};
+    return (
+      <span style={style} onClick={this.onClick}>L</span>
+    )
+  }
+
+  onClick = (e) => {
+    console.log(currentSong);
+
+    var songStr = localStorage.getItem("song" + currentSong);
+    if (songStr != null) {
+      const songJson = JSON.parse(songStr);
+      sequencerStore.loadJson(songJson);
+    }
+  }
+}
+
+
+
+class TrackSelector extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: 0
+    };
+  }
+  render() {
+    const style = {"height": "19vw", "width": "60%", "display": "inline-block", "verticalAlign": "top"};
+    return (
+      <div>
+        <select style={style} onChange={this.change} value={this.state.value}>
+          {[...Array(10)].map((x, i) => {
+            return (<option key={i}>{i}</option>)
+          })}
+        </select>
+        <SaveButton />
+        <LoadButton />
+      </div>
+    )
+  }
+
+  change = (e) => {
+    console.log(e.target.value);
+    currentSong = e.target.value;
+    this.setState({value: currentSong});
+  };
+}
 
 
 class SixVencer extends Component {
@@ -786,6 +876,8 @@ class SixVencer extends Component {
       <div>
         <SequenceLine store={ store } />
         <SixVencerKeyboard store={ store } numButtons={ store.numButtons } playState={ store.playState } />
+        <br/>
+        <TrackSelector />
       </div>
     )
   }
