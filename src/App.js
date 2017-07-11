@@ -862,6 +862,7 @@ class TrackSelector extends Component {
   change = (e) => {
     console.log(e.target.value);
     currentSong = e.target.value;
+    this.setState({value: currentSong});
   };
 }
 
