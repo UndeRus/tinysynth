@@ -2,7 +2,7 @@
   "name": "sixvencer",
   "version": "0.1.0",
   "private": true,
-  "homepage": "http://po.jugregator.org",
+  "homepage": ".",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
