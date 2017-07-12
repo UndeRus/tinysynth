@@ -19,9 +19,12 @@ import {
 } from "react-mdl";
 */
 
+import "./reset.min.css";
 import "./App.css";
+/*
 import "react-mdl/extra/css/material.light_blue-pink.min.css";
 import "react-mdl/extra/material.js";
+*/
 
 
 import {autorun, observable} from 'mobx';
@@ -57,7 +60,7 @@ var samplers = [
 ];
 
 for (var i = 0; i < samples.length; i++) {
-  samplers.push(new Tone.Sampler("/audio/" + samples[i] + ".wav").toMaster());
+  samplers.push(new Tone.Sampler("audio/" + samples[i] + ".wav").toMaster());
 }
 
 //Tone.context.latencyHint = 'fastest';
