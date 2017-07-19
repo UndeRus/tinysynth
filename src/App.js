@@ -192,6 +192,17 @@ class SequencerStore {
     }
   }
 
+  playNote(toneId) {
+    samplers[selectedSampler].triggerAttackRelease(toneId, "8n");
+  }
+
+
+  recordNote(toneId) {
+    sequencerStore.putNote(selectedSampler, sequencerStore.sequencePosition, toneId);
+    sequencerStore.moveCursorNext();
+    this.playNote(toneId);
+  }
+
 
   getJson() {
     return {
@@ -310,7 +321,8 @@ class NumButton extends Component {
 
     switch (keypadMode) {
       case NOTE_MODE:
-        samplers[selectedSampler].triggerAttackRelease(props.num, "8n");
+        //samplers[selectedSampler].triggerAttackRelease(props.num, "8n");
+        sequencerStore.playNote(props.num);
         break;
       case SAMPLE_SWITCH_MODE:
         selectedSampler = this.props.num - 1;
@@ -318,9 +330,12 @@ class NumButton extends Component {
         break;
       case RECORD_MODE:
         //TODO: record current sample to sequence
+        sequencerStore.recordNote(props.num);
+        /*
         sequencerStore.putNote(selectedSampler, sequencerStore.sequencePosition, props.num);
         sequencerStore.moveCursorNext();
         samplers[selectedSampler].triggerAttackRelease(props.num, "8n");
+        */
         break;
       case TRACK_SWITCH_MODE:
         sequencerStore.tracksEnabled[props.num - 1] = !sequencerStore.tracksEnabled[props.num - 1];
@@ -891,5 +906,49 @@ class App extends Component {
     )
   }
 }
+
+
+//TODO: refactor this MIDI input
+if (navigator.requestMIDIAccess) {
+    console.log('Browser supports MIDI!');
+
+
+      navigator.requestMIDIAccess()
+        .then(success, failure);
+}
+
+
+function success (midi) {
+    console.log('Got midi!', midi);
+
+
+    var inputs = midi.inputs.values();
+
+
+    for (var input = inputs.next();
+     input && !input.done;
+     input = inputs.next()) {
+    // each time there is a midi message call the onMIDIMessage function
+    input.value.onmidimessage = onMIDIMessage;
+  }
+}
+
+function failure () {
+    console.error('No access to your midi devices.')
+}
+
+
+function onMIDIMessage(message) {
+
+
+  if (message.data[0] === 144 && message.data[2] > 0) {
+    playNote(message.data[1]);
+  }
+}
+
+function playNote(tone) {
+  sequencerStore.playNote(tone);
+}
+
 
 export default App;
